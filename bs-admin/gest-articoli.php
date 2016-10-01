@@ -1,12 +1,14 @@
 <?php
 	require("../src/database/db_connect.php");
 	require("../src/login/function_login.php");
-	require("../src/pagine/function_page.php");
-	require("../src/class/page.php");
+	require("../src/articoli/function_article.php");
+	require("../src/class/article.php");
 	sec_session_start();
 	
 	if(!login_check($mysqli))
 		header('Location: ../bs_login.php');
+		
+	echo $_SERVER['DOCUMENT_ROOT'];
 ?>
 <!DOCTYPE HTML>
 <!--
@@ -16,7 +18,7 @@
 -->
 <html>
 	<head>
-		<title>Gestione Pagine</title>
+		<title>Gestione Articoli</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
@@ -42,34 +44,45 @@
 		<section id="three" class="wrapper">
 			<div class="inner">
 				<header class="align-center">
-					<h2>Gestione Pagine</h2>
+					<h2>Gestione Articoli</h2>
 					<?php 
 					if(isset($_SESSION['message'])) 
 						echo $_SESSION['message']; 
 					else
-						echo "<p>Crea, modifica elimina pagine.</p>";	
+						echo "<p>Crea, modifica elimina articoli.</p>";	
 					?>
 				</header>
-				<?php 
-					$pages = getPages($mysqli);
-					$result = '<thead><tr><th>Azioni</th><th>Titolo</th><th>Autore</th><th>Data</th></tr></thead>';
-					foreach($pages as $page){
-						$result .= "<tr><td><form action=\"modifica-pagina.php\" method=\"post\" >";
-			  			$result .= "<input type=\"hidden\" name =\"id_page_sel\" value=\"".$page->id_page."\" />";
-			  			$result .= "<button class=\"mod-del-info edit\" name=\"Modifica\" title=\"Modifica\" type=\"submit\" ></button></form>";
-			  			$result .= "<form action=\"elimina-pagina.php\" method=\"post\" >";
-			  			$result .= "<input type=\"hidden\" name =\"id_page_sel\" value=\"".$page->id_page."\" />";
-			  			$result .= "<button class=\"mod-del-info delete\" name=\"Elimina\" title=\"Elimina\" type=\"submit\" onclick=\"return confirm('Sicuro di voler elliminare la pagina selezionata?')\" ></button></form></td>";
-						$result .= "<td>".$page->name_page."</td><td>".$page->permalink."</td><td>".$page->user_author."</td></tr>";
-					}
-					$result .= "<tr><td><form action=\"nuova-pagina.php\" method=\"post\" >";
-		  			$result .= "<input type=\"hidden\" name =\"name_page\" />";
-		  			$result .= "<button class=\"mod-del-info add\" name=\"Inserisci\" title=\"Inserisci\" type=\"submit\" ></button></form>";
-		  			$result .= "</td><td></td><td></td><td></td></tr>";
+				<?php
+					$articles = getArticles($mysqli);
+					if(!empty($articles)){
+						$result = '<table><thead><tr>';
+						$result .= '<th>Azioni</th><th>Stato</th><th>Nome</th><th>Categoria</th><th>Data Creazione</th><th>Autore</th>';
+						$result .= '</tr></thead>';
+						foreach($articles as $article){
+							$result .= '<tr><td><form action="modifica-articolo.php" method="post" >';
+				  			$result .= '<input type="hidden" name = "name_article_sel" value="'.$article->name_article.'" />';
+				  			$result .= '<button class="mod-del-info edit" name="Modifica" title="Modifica" type="submit" ></button>';
+				  			$result .= '</form>';
+				  			$result .= '<form action="elimina-articolo.php" method="post" >';
+				  			$result .= '<input type="hidden" name="name_article_sel" value="'.$article->name_article.'" />';
+				  			$result .= '<button class="mod-del-info delete" name="Elimina" title="Elimina" type="submit" ';
+				  			$result .= 'onclick="return confirm(\'Sicuro di voler elliminare l\'articolo selezionato?\')" ></button>';
+				  			$result .= '</form></td>';
+				  			if($article->published)
+				  				$result .= '<td><img src="../images/online.svg" title="Pubblicato"></td>';
+				  			else
+				  				$result .= '<td><img src="../images/offline.svg" title="Non Pubblicato"></td>';
+							$result .= '<td>'.$article->name_article.'</td>';
+							$result .= '<td>'.$article->category.'</td>';
+							$result .= '<td>'.$article->date_creation.'</td>';
+							$result .= '<td>'.$article->user_author.'</td></tr>';
+						}
+						$result .= '<tr><td><form action="nuovo-articolo.php" method="post" >';
+				  		$result .= '<button class="mod-del-info add" name="Inserisci" title="Inserisci" type="submit" ></button>';
+						$result .= '</form></td><td></td><td></td><td></td><td></td><td></td></tr></table>';
+			  			echo $result;
+					}		
 				?>
-				<table>
-					<?php echo $result; ?>
-				</table>
 				
 			</div>
 		</section>

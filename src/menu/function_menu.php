@@ -248,10 +248,15 @@
 			$result .= "<input type=\"hidden\" name=\"id_submenu_sel\" value=\"".$sub_menu->id_sub_menu."\" />";
 			$result .= "<input type=\"hidden\" name=\"name_menu\" value=\"".$sub_menu->name_menu."\" />";
 			$result .= "<button class=\"mod-del-info delete\" name=\"elimina\" title=\"Elimina\" type=\"submit\" onclick=\"return confirm('Sicuro di voler elliminare la voce selezionata e tutte le sue sottovoci?')\" ></button></form>";
+			$result .= '<form action="" method="post" >';
+			$result .= "<input type=\"hidden\" name=\"id_submenu_sel\" value=\"".$sub_menu->id_sub_menu."\" />";
+			$result .= "<input type=\"hidden\" name=\"name_menu\" value=\"".$sub_menu->name_menu."\" />";
+			$result .= "<button class=\"mod-del-info home\" name=\"Home\" title=\"Home\" type=\"submit\" ></button></form>";
 			$result .= '</div><div clsss="9u"><mt>'.$sub_menu->name_sub_menu.'</mt></div>';
 			$result .= '</div>';
 			if(!empty($sub_menu->sub_menu))
 				$result .= printSubMenu($sub_menu->sub_menu, $id_submenu_sel, $liv+30, $mysqli);
+				
 		}
 		return $result;
 	}

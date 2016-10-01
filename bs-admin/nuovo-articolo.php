@@ -1,69 +1,55 @@
 <?php
 	require("../src/database/db_connect.php");
 	require("../src/login/function_login.php");
-	require("../src/menu/function_menu.php");
-	require("../src/pagine/function_page.php");
-	require("../src/class/widget.php");
-	require("../src/class/page.php");
+	require("../src/articoli/function_article.php");
+	require("../src/class/article.php");
 	sec_session_start();
 
+	unset($_SESSION['message']);
+		
 	if(!login_check($mysqli))
 		header('Location: ../bs_login.php');
-			
-	elseif(isset($_POST['inserisci']) && isset($_POST['name_menu']) && isset($_POST['pos_menu'])){
-		
+	
+	elseif(isset($_POST['inserisci']) && isset($_POST['name_article']) && isset($_POST['category_article'])){
 		if(checkData()){
-			$pos = (int)$_POST['pos_menu'];
-				
 			$public = 0;
-			if(isset($_POST['public_menu']))
+			if(isset($_POST['public_article']))
 				$public = 1;
-					
-			if($pos == 1)
-				$pos = "menu";
 				
-			if(searchMenu($_POST['name_menu'], $mysqli) == 1){
-				if(insertMenu($_POST['name_menu'], $pos, "menu", $public, $mysqli)){
-					// inserisci associazione pagine-menu
-					if(isset($_POST['page_menu'])){
-						$pagine_sel = $_POST['page_menu'];
-						$n_pagine_sel = count($pagine_sel);
-			    		for($i=0; $i < $n_pagine_sel; $i++){
-			    			insertPageMenu($pagine_sel[$i], $_POST['name_menu'], $mysqli);
-			    		}
-					}
-					resetVar();
-					unset($_SESSION['message']);
-					header('Location: gest-menu.php');	
+			if(searchArticle($_POST['name_article'], $mysqli) == 1){
+				if(searchCategory($_POST['category_article'], $mysqli) == 2){
+					if(insertArticle($_POST['name_article'], $_POST['category_article'], $_POST['html_article'], $public, $mysqli)){
+						resetVar();
+						header('Location: gest-articoli.php');	
+					}else
+						$_SESSION['message'] = "<er>Errore durante l'inserimento</er>";
 				}else
-					$_SESSION['message'] = "<er>Errore durante l'inserimento</er>";
+					$_SESSION['message'] = "<er>Non esiste una categoria con questo nome</er>";
 			}else
-				$_SESSION['message'] = "<er>Esiste gia un menu con questo nome</er>";
-			
-				
+				$_SESSION['message'] = "<er>Esiste gia un articolo con questo nome</er>";
 		}
-	}else
-		unset($_SESSION['message']);
+	}	
 	
 	function checkData(){
-		$pos = (int)$_POST['pos_menu'];
-		if(strlen($_POST['name_menu']) > 50 || strlen($_POST['name_menu']) == 0){
-			$_SESSION['message'] = "<er>Valore nome menu non corretto</er>";
+		if(strlen($_POST['name_article']) > 50 || strlen($_POST['name_article']) == 0){
+			$_SESSION['message'] = "<er>Valore nome articolo non corretto</er>";
 			return false;
-		}elseif($pos != 1){
-			$_SESSION['message'] = "<er>Valore posizione menu non corretto</er>";
+		}elseif(strlen($_POST['html_article']) > 2048){
+			$_SESSION['message'] = "<er>Valore contenuto articolo non corretto</er>";
+			return false;
+		}elseif(strlen($_POST['category_article']) > 50 || strlen($_POST['category_article']) == 0){
+			$_SESSION['message'] = "<er>Valore nome categoria non corretto</er>";
 			return false;
 		}else
 			return true;
 	}
 	
 	function resetVar(){
-		unset($_POST['name_menu']);
-		unset($_POST['pos_menu']);
-		if(isset($_POST['page_menu']))
-			unset($_POST['page_menu']);
-		if(isset($_POST['public_menu']))
-			unset($_POST['public_menu']);
+		unset($_POST['name_article']);
+		unset($_POST['html_article']);
+		unset($_POST['category_article']);
+		if(isset($_POST['public_article']))
+			unset($_POST['public_article']);
 	}
 ?>
 <!DOCTYPE HTML>
@@ -74,7 +60,7 @@
 -->
 <html>
 	<head>
-		<title>Nuovo Menu</title>
+		<title>Nuovo Articolo</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
@@ -100,65 +86,57 @@
 		<section id="three" class="wrapper">
 			<div class="inner">
 				<header class="align-center">
-					<h2>Nuovo Menu</h2>
+					<h2>Nuovo Articolo</h2>
 					<?php 
 					if(isset($_SESSION['message'])) 
 						echo $_SESSION['message']; 
 					else
-						echo "<p>Crea un nuovo menu.</p>";	
+						echo "<p>Crea un nuovo articolo.</p>";	
 					?>
 				</header>
 				<form method="post" action="">
 					<div class="row uniform">
 						<div class="9u 12u$(small)">
-							<strong>Nome menu</strong>
-							<input type="text" name="name_menu" id="name_menu" required="" 
-								value="<?php if(isset($_POST['name_menu'])) echo $_POST['name_menu']; ?>" 
-								placeholder="Nome*" onKeyDown="nameCounter(this.form.name_menu);" 
-								onKeyUp="nameCounter(this.form.name_menu);">
-							<span id="nameCount">
-								<?php if(isset($_POST['name_menu'])) echo 50 - strlen($_POST['name_menu']);
-								else echo "50"; ?>																		
-							</span> Caratteri rimanenti.
-							<br/><br/>
-							<strong>Assegnazione alle pagine:</strong>
-							<div class="12u$">
-							
-								<div class="12u$">
-									<?php 
-										$name_menu = "";
-										if(isset($_POST['name_menu'])) $name_menu = $_POST['name_menu'];
-										$page_menu = array();
-										if(isset($_POST['page_menu'])) $page_menu = $_POST['page_menu'];
-										$pages = getNoMenuPages($name_menu, $page_menu, $mysqli);
-										foreach($pages as $page){
-					echo "<input type=\"checkbox\" id=\"page_menu:check:".$page->name_page."\" name=\"page_menu[]\" value=\"".$page->name_page."\">";
-					echo "<label for=\"page_menu:check:".$page->name_page."\">".$page->name_page."</label>";
-										}
-										if(count($pages) == 0)
-											echo "<p>Nessuna pagina senza menu</p>"
-									?>									
-								</div>
-							</div>
+							<strong>Nome Articolo</strong>
+							<input type="text" name="name_article" id="name_article" required="" 
+										value="<?php if(isset($_POST['name_article'])) echo $_POST['name_article']; ?>" 
+										placeholder="Nome*" onKeyDown="nameCounter(this.form.name_article);" 
+										onKeyUp="nameCounter(this.form.name_article);">
+									<span id="nameCount">
+										<?php if(isset($_POST['name_article'])) echo 50 - strlen($_POST['name_article']);
+										else echo "50"; ?>																		
+									</span> Caratteri rimanenti.
+							<br/>
+							<strong>Contenuto</strong>
+							<textarea name="html_article" id="html_article" placeholder="Html personalizzato" rows="6" 
+										onKeyDown="descrCounter(this.form.html_article);" 
+										onKeyUp="descrCounter(this.form.html_article);"><?php if(isset($_POST['html_article'])) echo $_POST['html_article'];?></textarea>
+								<span id="descrCount">
+									<?php if(isset($_POST['html_article'])) echo 2048 - strlen($_POST['html_article']);
+										else echo '2048'; ?>
+								</span> Caratteri rimanenti.
 						</div>
-						
 						<div class="3u$ 12u$(small)">
-							<strong>Pubblica Menu</strong>
-							<div class="select-wrapper">
-								<select name="pos_menu" id="pos_menu" required="">
-									<option value="">Posizione Menu*</option>
-									<option value="1" 
-										<?php if(isset($_POST['pos_menu']) && $_POST['pos_menu'] == 1) 
-											echo "selected=\"\""; ?> 
-										>Main Menu</option>
-								</select>
+							<strong>Categoria</strong>	
+							<div class="12u">
+								<?php 
+								$categories = getCategories($mysqli);
+								echo '<select name="category_article" id="category_article" required="">';
+								for($i=0; $i<count($categories); $i++){
+									echo '<option value="'.$categories[$i].'" ';
+									if(isset($_POST['category_article']) && strcmp($_POST['category_article'], $categories[$i]) == 0)
+										echo 'selected=""';
+									echo '>'.$categories[$i].'</option>';
+								}
+								echo '</select>';
+								?>									
 							</div>
-							<hr/>
-							<div class="12u$">
-								<input type="checkbox" id="public_menu" name="public_menu[]" 
-								<?php if(isset($_POST['public_menu'])) echo "checked=\"\""; ?>>
-								<label for="public_menu">Pubblica</label>
-								
+							<hr/>						
+							<div class="12u">
+								<input type="checkbox" id="public_article" name="public_article[]" 
+								<?php if(isset($_POST['public_article'])) echo 'checked=""'; ?>>
+								<label for="public_article">Pubblica</label>
+								<br/>
 								<div class="row uniform">
 									<div class="12u">
 										<input type="submit" name="inserisci" value="Inserisci" style="float: right;">
@@ -194,7 +172,7 @@
 
 		<!-- Scripts -->
 			<script>
-			var maxDescrSize = 156;
+			var maxDescrSize = 2048;
 			function descrCounter(textField) {
 			    if (textField.value.length > maxDescrSize) {
 			        textField.value = textField.value.substring(0, maxDescrSize);

@@ -244,6 +244,19 @@
 							</div>
 							<br/>
 							<div class="12u$">
+								Tipo sottovoce
+								<div class="select-wrapper">
+									<select name="type_submenu" id="type_submenu" onchange="typeCheck(this.form.type_submenu);" 
+										 onload="typeCheck(this.form.type_submenu);">
+										<option value="1">Link Pagina</option>
+										<option value="2">Link Esterno</option>
+										<option value="3">Voce di menu</option>
+									</select>
+								</div>
+							</div>
+							
+							<div class="12u$" id="div_link_submenu">
+								<br/>
 								Link Pagina
 								<div class="select-wrapper">
 									<select name="link_submenu" id="link_submenu" >
@@ -252,8 +265,8 @@
 											$pages = getPages($mysqli);
 											$result = "";
 											foreach($pages as $page){
-												$result .= '<option value="'.$page->name_page.'"';
-												if(strcmp($page->name_page, $link_submenu) == 0)
+												$result .= '<option value="'.$page->id_page.'"';
+												if(strcmp($page->id_page, $link_submenu) == 0)
 													$result .= ' selected="" ';
 												$result .= '>'.$page->name_page.'</option>';
 											}
@@ -261,14 +274,14 @@
 									</select>
 								</div>
 							</div>
-							<?php if(isset($_POST['id_submenu_sel'])){ ?>
-							<br/>
-							<div class="12u$">
-								Parmaname
-								<input type="text" name="permaname_submenu" id="permaname_submenu" readonly=""
-									value="<?php echo $permaname_submenu;?>">
+							
+							<div class="12u$" id="div_link_esterno">
+								<br/>
+								Link Esterno
+								<input type="text" name="link_esterno" id="link_esterno" 
+									placeholder="Link*" >
 							</div>
-							<?php }?>
+							
 							<hr/>
 							<div class="row uniform">
 								<div class="12u">
@@ -311,12 +324,16 @@
 
 		<!-- Scripts -->
 			<script>
-			var maxDescrSize = 156;
-			function descrCounter(textField) {
-			    if (textField.value.length > maxDescrSize) {
-			        textField.value = textField.value.substring(0, maxDescrSize);
-				} else { 
-			        document.getElementById("descrCount").innerHTML = maxDescrSize - textField.value.length;
+			function typeCheck(textField) {
+			    if (textField.value == 1) {
+			        document.getElementById("div_link_submenu").style.display = 'block';
+			        document.getElementById("div_link_esterno").style.display = 'none';
+				} else if (textField.value == 2) { 
+					document.getElementById("div_link_esterno").style.display = 'block';
+			        document.getElementById("div_link_submenu").style.display = 'none';
+				}else if (textField.value == 3) {
+					document.getElementById("div_link_esterno").style.display = 'none';
+			        document.getElementById("div_link_submenu").style.display = 'none';
 				}
 			}
 			var maxTitleSize = 65;
@@ -335,6 +352,7 @@
 			        document.getElementById("nameCount").innerHTML = maxNameSize - textField.value.length;
 				}
 			}
+			window.onload = typeCheck(document.getElementById("type_submenu"));
 			</script>
 			<script src="../assets/js/jquery.min.js"></script>
 			<script src="../assets/js/skel.min.js"></script>

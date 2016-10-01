@@ -146,7 +146,7 @@
 				<form method="post" action="">
 					<div class="row uniform">
 						<div class="9u 12u$(small)">
-							<h4>Nome menu</h4>
+							<strong>Nome menu</strong>
 							<input type="hidden" name="old_name_menu" id="old_name_menu"  
 										value="<?php echo $old_name_menu; ?>" >
 							<input type="text" name="name_menu" id="name_menu" required="" 
@@ -156,8 +156,8 @@
 							<span id="nameCount">
 								<?php echo 50 - strlen($name_menu); ?>															
 							</span> Caratteri rimanenti.
-							<hr/>
-							<h4>Assegnazione alle pagine:</h4>
+							<br/><br/>
+							<strong>Assegnazione alle pagine:</strong>
 							<div class="3u$ 12u$(small)">
 							
 								<div class="12u$">
@@ -178,7 +178,7 @@
 						</div>
 						
 						<div class="3u$ 12u$(small)">
-							<h4>Pubblica Menu</h4>
+							<strong>Pubblica Menu</strong>
 							<div class="select-wrapper">
 								<select name="pos_menu" id="pos_menu" required="">
 									<option value="">Posizione Menu*</option>
@@ -187,7 +187,7 @@
 										>Main Menu</option>
 								</select>
 							</div>
-							<br/>
+							<hr/>
 							<div class="12u$">
 								<input type="checkbox" id="public_menu" name="public_menu[]" 
 								<?php if($public_menu == 1) echo "checked=\"\""; ?>>

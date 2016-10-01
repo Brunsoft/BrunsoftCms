@@ -3,16 +3,20 @@ require_once('article.php');
 require_once('widget.php');
 
 class Page{
+	public $id_page;
     public $name_page;
     public $descr;
     public $title;
     public $type;		// Single Article, Blog
+    public $category_articles;
     public $permaname;
+    public $main_page;
     public $date_creation;
     public $date_last_edit;
     public $user_author;
     public $user_last_edit;
     public $published;
+    public $ord;
     public $menu;		// Array oggetti Widget type menu
     public $logo;		// Array oggetti Widget type logo
     public $banner;		// Array oggetti Widget type banner
@@ -23,30 +27,36 @@ class Page{
     public $bottom_b;	// Array oggetti Widget type bottomB
     public $footer;		// Array oggetti Widget type footer
 
+	public $permalink;
        
-    public function __construct($name_page, $mysqli){
-		$this->init($name_page, $mysqli);
+    public function __construct($id_page, $mysqli){
+		$this->init($id_page, $mysqli);
     }
     
-    public function init($name_page, $mysqli){
-    	if ($stmt = $mysqli->prepare("SELECT title, descr, type, permaname, date_creation, date_last_edit, user_author, user_last_edit, published FROM page WHERE name_page = ?")) {
-			$stmt->bind_param('s', $name_page);
+    public function init($id_page, $mysqli){
+    	if ($stmt = $mysqli->prepare("SELECT name_page, title, descr, type, category_articles, permaname, main_page, date_creation, date_last_edit, user_author, user_last_edit, published, ord FROM page WHERE id_page = ?")) {
+			$stmt->bind_param('s', $id_page);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($title, $descr, $type, $permaname, $date_creation, $date_last_edit, $user_author, $user_last_edit, $published);
+			$stmt->bind_result($name_page, $title, $descr, $type, $category_articles, $permaname, $main_page, $date_creation, $date_last_edit, $user_author, $user_last_edit, $published, $ord);
 			$stmt->fetch(); 
 			if ($stmt->affected_rows > 0){
+				$this->id_page = $id_page;
 				$this->name_page = $name_page;
 				$this->title = $title;
 				$this->descr = $descr;
 				$this->type = $type;
+				$this->category_articles = $category_articles;
 				$this->permaname = $permaname;
+				$this->main_page = $main_page;
 				$this->date_creation = $date_creation;
 				$this->date_last_edit = $date_last_edit;
 				$this->user_author = $user_author;
 				$this->user_last_edit = $user_last_edit;
 				$this->published = $published;
+				$this->ord = $ord;
 			}
+			$this->permalink = $this->getPermalink($this->main_page, $mysqli).'/';
 			$this->findContent($this->name_page, $mysqli);
 		}
 	}
@@ -83,6 +93,31 @@ class Page{
 				}
 			}
 		}
+	}
+	
+	private function getPermalink($page, $mysqli){
+		$result = "";
+		$mainpage = "";
+		if(strcmp($page, "")!=0){
+			if ($stmt = $mysqli->prepare("SELECT main_page, permaname FROM page WHERE id_page = ?")) {
+				$stmt->bind_param('s', $page); 
+				$stmt->execute();
+				$stmt->store_result();
+				$stmt->bind_result($main_page, $permaname); 
+				$stmt->fetch();
+				if ($stmt->affected_rows > 0){
+					$mainpage .= $main_page;
+					$result = '/'.$permaname;
+				}
+						
+			}
+		}else
+			return $result;
+			
+		if(strcmp($mainpage, "") != 0)
+			$result = $this->getPermalink($mainpage, $mysqli).$result;
+
+		return $result;
 	}
 	
 	/*public function toString($content){

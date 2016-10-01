@@ -124,7 +124,7 @@
 				<form method="post" action="">
 					<div class="row uniform">
 						<div class="9u 12u$(small)">
-							<h4>Nome widget</h4>
+							<strong>Nome widget</strong>
 							<input type="text" name="name_widget" id="name_widget" required="" 
 										value="<?php if(isset($_POST['name_widget'])) echo $_POST['name_widget']; ?>" 
 										placeholder="Nome*" onKeyDown="nameCounter(this.form.name_widget);" 
@@ -133,8 +133,8 @@
 										<?php if(isset($_POST['name_widget'])) echo 50 - strlen($_POST['name_widget']);
 										else echo "50"; ?>																		
 									</span> Caratteri rimanenti.
-							<br/><br/>
-							<h4>Contenuto</h4>
+							<br/>
+							<strong>Contenuto</strong>
 							<textarea name="html_widget" id="html_widget" placeholder="Html personalizzato" rows="6" 
 										onKeyDown="descrCounter(this.form.html_widget);" 
 										onKeyUp="descrCounter(this.form.html_widget);"><?php if(isset($_POST['html_widget'])) echo $_POST['html_widget'];?></textarea>
@@ -143,25 +143,25 @@
 										else echo '2048'; ?>
 								</span> Caratteri rimanenti.
 							<br/><br/>
-							<h4>Associa alle pagine</h4>	
+							<strong>Associa alle pagine</strong>	
 							<div class="12u$">
 								<?php 
 									
 									$pages = getPages($mysqli);
 									foreach($pages as $page){
-										echo '<input type="checkbox" id="page_widget:check:'.$page->name_page;
-										if(in_array($page->name_page, $page_widget))
-											echo '" name="page_widget[]" value="'.$page->name_page.'" checked="">';
+										echo '<input type="checkbox" id="page_widget:check:'.$page->id_page;
+										if(in_array($page->id_page, $page_widget))
+											echo '" name="page_widget[]" value="'.$page-id_page.'" checked="">';
 										else
-											echo '" name="page_widget[]" value="'.$page->name_page.'" >';
-										echo '<label for="page_widget:check:'.$page->name_page.'">'.$page->name_page.'</label>';
+											echo '" name="page_widget[]" value="'.$page->id_page.'" >';
+										echo '<label for="page_widget:check:'.$page->id_page.'">'.$page->name_page.'</label>';
 										}
 								?>									
 							</div>
 						</div>
 						
 						<div class="3u$ 12u$(small)">
-							<h4>Posizione</h4>
+							<strong>Posizione</strong>
 							<div class="select-wrapper">
 								<select name="pos_widget" id="pos_widget" required="">
 									<option value="">Posizione widget*</option>
@@ -192,7 +192,7 @@
 								</select>
 							</div>
 							<br/>
-							<h4>Dimensione</h4>
+							<strong>Dimensione</strong>
 							<div class="select-wrapper">
 								<select name="dim_widget" id="dim_widget" required="">
 									<option value="">Dimensione widget*</option>
@@ -214,8 +214,8 @@
 										>25%</option>
 								</select>
 							</div>
+							<hr/>
 							<div class="12u$">
-								<br/>
 								<input type="checkbox" id="public_widget" name="public_widget[]" 
 								<?php if(isset($_POST['public_widget'])) echo 'checked=""'; ?>>
 								<label for="public_widget">Pubblica</label>

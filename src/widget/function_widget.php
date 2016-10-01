@@ -17,14 +17,14 @@
 	
 	function getWidgetPages($name_widget, $mysqli){
 		$pages = array();
-		if ($stmt = $mysqli->prepare("SELECT name_page FROM widget_page WHERE name_widget = ?")) {
+		if ($stmt = $mysqli->prepare("SELECT id_page FROM widget_page WHERE name_widget = ?")) {
 			$stmt->bind_param('s', $name_widget);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($name_page); 
+			$stmt->bind_result($id_page); 
 			if ($stmt->affected_rows > 0){
 				while ($stmt->fetch()) {
-					array_push($pages, $name_page);
+					array_push($pages, $id_page);
 				}
 			}
 		}
@@ -129,9 +129,9 @@
 	   	return false;
 	}
 	
-	function insertWidgetPage($name_page, $name_widget, $mysqli) {		
-	    if ($stmt = $mysqli->prepare("INSERT INTO widget_page (name_page, name_widget) VALUES (?, ?)")) {
-			$stmt->bind_param('ss', $name_page, $name_widget);
+	function insertWidgetPage($id_page, $name_widget, $mysqli) {		
+	    if ($stmt = $mysqli->prepare("INSERT INTO widget_page (id_page, name_widget) VALUES (?, ?)")) {
+			$stmt->bind_param('is', $id_page, $name_widget);
 			$stmt->execute(); 
 			$stmt->store_result();
 			if ($stmt->affected_rows > 0) 
