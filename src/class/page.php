@@ -17,6 +17,7 @@ class Page{
     public $user_last_edit;
     public $published;
     public $ord;
+    public $home;
     public $menu;		// Array oggetti Widget type menu
     public $logo;		// Array oggetti Widget type logo
     public $banner;		// Array oggetti Widget type banner
@@ -31,14 +32,15 @@ class Page{
        
     public function __construct($id_page, $mysqli){
 		$this->init($id_page, $mysqli);
+		
     }
     
     public function init($id_page, $mysqli){
-    	if ($stmt = $mysqli->prepare("SELECT name_page, title, descr, type, category_articles, permaname, main_page, date_creation, date_last_edit, user_author, user_last_edit, published, ord FROM page WHERE id_page = ?")) {
+    	if ($stmt = $mysqli->prepare("SELECT name_page, title, descr, type, category_articles, permaname, main_page, date_creation, date_last_edit, user_author, user_last_edit, published, ord, home FROM page WHERE id_page = ?")) {
 			$stmt->bind_param('s', $id_page);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($name_page, $title, $descr, $type, $category_articles, $permaname, $main_page, $date_creation, $date_last_edit, $user_author, $user_last_edit, $published, $ord);
+			$stmt->bind_result($name_page, $title, $descr, $type, $category_articles, $permaname, $main_page, $date_creation, $date_last_edit, $user_author, $user_last_edit, $published, $ord, $home);
 			$stmt->fetch(); 
 			if ($stmt->affected_rows > 0){
 				$this->id_page = $id_page;
@@ -55,41 +57,58 @@ class Page{
 				$this->user_last_edit = $user_last_edit;
 				$this->published = $published;
 				$this->ord = $ord;
+				$this->home = $home;
 			}
 			$this->permalink = $this->getPermalink($this->main_page, $mysqli).'/';
-			$this->findContent($this->name_page, $mysqli);
+			$this->menu = array();
+			$this->banner = array();
+			$this->top_a = array();
+			$this->top_b = array();
+			$this->main = array();
+			$this->bottom_a = array();
+			$this->bottom_b = array();
+			$this->footer = array();
+			$this->findContent($this->id_page, $mysqli);
 		}
 	}
 
-	private function findContent($name_page, $mysqli){
-    	if ($stmt = $mysqli->prepare("SELECT w.name_widget, w.type FROM widget_page wp JOIN widget w ON wp.name_widget = w.name_widget WHERE w.name_page = ? ORDER BY w.ord")) {
-			$stmt->bind_param('s', $name_page);
+	private function findContent($id_page, $mysqli){
+		// Cerco eventuali Widget
+    	if ($stmt = $mysqli->prepare("SELECT w.name_widget, w.pos FROM widget_page wp JOIN widget w ON wp.name_widget = w.name_widget WHERE wp.id_page = ? ORDER BY w.ord")) {
+			$stmt->bind_param('i', $id_page);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($name_widget, $type);
+			$stmt->bind_result($name_widget, $pos);
 			if ($stmt->affected_rows > 0){
 				while ($stmt->fetch()) {
-					if(strcmp($type, "banner") == 0)
+					if(strcmp($pos, "banner") == 0)
 						array_push($this->banner, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "topA") == 0)
+					elseif(strcmp($pos, "topA") == 0){
 						array_push($this->top_a, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "topB") == 0)
+					}elseif(strcmp($pos, "topB") == 0)
 						array_push($this->top_b, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "bottomA") == 0)
+					elseif(strcmp($pos, "bottomA") == 0)
 						array_push($this->bottom_a, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "bottomB") == 0)
+					elseif(strcmp($pos, "bottomB") == 0)
 						array_push($this->bottom_b, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "main") == 0)
-						array_push($this->main, new Article($name_widget, $mysqli));
-					elseif(strcmp($type, "footer") == 0)
+					elseif(strcmp($pos, "footer") == 0)
 						array_push($this->footer, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "menu") == 0)
+					elseif(strcmp($pos, "menu") == 0)
 						array_push($this->menu, new Widget($name_widget, $mysqli));
-					elseif(strcmp($type, "logo") == 0)
+					elseif(strcmp($pos, "logo") == 0)
 						array_push($this->logo, new Widget($name_widget, $mysqli));
-					/*foreach($this->banner as $content){
-						echo $content->name_content;
-					}*/
+				}
+			}
+		}
+		// Cerco eventuali articoli
+		if ($stmt = $mysqli->prepare("SELECT name_article FROM article_page WHERE id_page = ?")) {
+			$stmt->bind_param('i', $id_page);
+			$stmt->execute();
+			$stmt->store_result();
+			$stmt->bind_result($name_article);
+			if ($stmt->affected_rows > 0){
+				while ($stmt->fetch()) {
+					array_push($this->main, new Article($name_article, $mysqli));
 				}
 			}
 		}
@@ -120,70 +139,94 @@ class Page{
 		return $result;
 	}
 	
-	/*public function toString($content){
+	public function toString($content, $mysqli){
 		$result = "";
 		$contents = array();
 		$class = "";
 		if(strcmp($content, "banner") == 0){
 			$contents = $this->banner;
-			$class = $this->class_banner;
+			//$class = $this->class_banner;
 		}elseif(strcmp($content, "topA") == 0){
 			$contents = $this->top_a;
-			$class = $this->class_top_a;
+			//$class = $this->class_top_a;
 		}elseif(strcmp($content, "topB") == 0){
 			$contents = $this->top_b;
-			$class = $this->class_top_b;
+			//$class = $this->class_top_b;
 		}elseif(strcmp($content, "main") == 0){
 			$contents = $this->main;
-			$class = $this->class_main;	
+			//$class = $this->class_main;	
 		}elseif(strcmp($content, "bottomA") == 0){
 			$contents = $this->bottom_a;
-			$class = $this->class_bottom_a;	
+			//$class = $this->class_bottom_a;	
 		}elseif(strcmp($content, "bottomB") == 0){
 			$contents = $this->bottom_b;
-			$class = $this->class_bottom_b;	
+			//$class = $this->class_bottom_b;	
 		}elseif(strcmp($content, "footer") == 0){
 			$contents = $this->footer;
-			$class = $this->class_footer;	
+			//$class = $this->class_footer;	
+		}elseif(strcmp($content, "menu") == 0){
+			$contents = $this->menu;
+			//$class = $this->class_footer;	
 		}
 		
+		//echo count($contents);
 		if(count($contents) > 0){
-			if(strcmp($content, "footer") == 0)
-				$result .= '<footer id="'.$content.'" class="'.$class.'">';
-			else
-				$result .= '<section id="'.$content.'" class="'.$class.'">';
+			if(strcmp($content, "menu") == 0){
+				foreach($contents as $c){
+					$sub_menu = $c->sub_menu;
+					foreach($sub_menu as $sb){
+						$permalink = '/mvc'.$this->getPermalink($sb->link, $mysqli);
+						$result .= '<a href="'.$permalink.'">'.$sb->name_sub_menu.'</a>';
+					}
+				}
 				
-			$result .= '<div class="row">';
-			
-			foreach($contents as $c){
-				if($c->dimension == 1)
-					$result .= '<div class="12u 12u$(small)">';
-				elseif($c->dimension == 2)
-					$result .= '<div class="6u 12u$(small)">';
-				elseif($c->dimension == 3)
-					$result .= '<div class="4u 12u$(small)">';
-				elseif($c->dimension == 4)
-					$result .= '<div class="3u 12u$(small)">';
+			}elseif(strcmp($content, "main") == 0){
+				if($this->category_articles == null){	// Single Article or Hidden article
+					$result .= '<section id="'.$content.'" class="wrapper style1 special">';
+					$result .= '<div class="inner">';
+					foreach($contents as $c)
+						$result .= $c->html;
+					$result .= '</div></section>';
+				}
+				
+			}else{
+				if(strcmp($content, "footer") == 0)
+					$result .= '<footer id="'.$content.'" class="wrapper">';
+					
+				else{
+					$result .= '<section id="'.$content.'" class="wrapper">';
+					$result .= '<div class="inner">';
+				}
+					
+				$result .= '<div class="row">';
+				
+				foreach($contents as $c){
+					if($c->published == 1){
+						if($c->dim == 1)
+							$result .= '<div class="12u 12u$(small)">';
+						elseif($c->dim == 2)
+							$result .= '<div class="6u 12u$(small)">';
+						elseif($c->dim == 3)
+							$result .= '<div class="4u 12u$(small)">';
+						elseif($c->dim == 4)
+							$result .= '<div class="3u 12u$(small)">';
+						else
+							$result .= '<div>';	
+						$result .= $c->html;
+						$result .= '</div>';
+					}
+				}
+				$result .= '</div></div>';
+				if(strcmp($content, "footer") == 0)
+					$result .= '</footer>';
 				else
-					$result .= '<div
-					>';
-				
-				$result .= '<header class="'.$c->class_header.'">';
-				$result .= '<h1>'.$c->title_header.'</h1><p>'.$c->sub_title_header.'</p>';
-				$result .= '<header>';
-				
-				$result .= $c->text_html;
-				$result .= '</div>';
+					$result .= '</section>';
 			}
-			$result .= '</div>';
-			if(strcmp($content, "footer") == 0)
-				$result .= '</footer>';
-			else
-				$result .= '</section>';
 		}
+			
 		
 		return $result;
-	}*/
+	}
 
 }
 

@@ -181,7 +181,7 @@
 	}
 	
 	function getIdPage($name_page, $mysqli){
-		if ($stmt = $mysqli->prepare("SELECT id_page FROM page WHERE name_page = ?")) {
+		if ($stmt = $mysqli->prepare()) {
 			$stmt->bind_param('s', $name_page); 	
 			$stmt->execute(); 
 			$stmt->store_result();
@@ -191,6 +191,31 @@
 				return $id_page;
 	   	}
 	   	return "";
+	}
+	
+	function searchPagePermaname($permaname, $main_permaname, $mysqli){
+		if ($stmt = $mysqli->prepare("SELECT * FROM page WHERE permaname = ? AND main_page = (SELECT id_page FROM page WHERE permaname = ?)")) {
+			$stmt->bind_param('ss', $permaname, $main_permaname); 	
+			$stmt->execute(); 
+			$stmt->store_result();
+			$stmt->fetch();
+			if ($stmt->affected_rows > 0) 
+				return true;
+	   	}
+	   	return false;
+	}
+	
+	function getIdPagePermaname($permaname_page, $mysqli){
+		if ($stmt = $mysqli->prepare("SELECT id_page FROM page WHERE permaname = ?")) {
+			$stmt->bind_param('s', $permaname_page); 	
+			$stmt->execute(); 
+			$stmt->store_result();
+			$stmt->bind_result($id_page); 
+			$stmt->fetch();
+			if ($stmt->affected_rows > 0) 
+				return $id_page;
+	   	}
+	   	return 0;
 	}
 		
 	function deletePage($id_page, $mysqli) {		
