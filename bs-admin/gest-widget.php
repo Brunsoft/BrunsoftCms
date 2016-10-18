@@ -6,7 +6,10 @@
 	sec_session_start();
 	
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
+		
 ?>
 <!DOCTYPE HTML>
 <!--
@@ -26,7 +29,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>
@@ -53,7 +56,7 @@
 				<?php
 					$array_pos = array("banner","topA","topB","bottomA","bottomB","footer");
 					for($i=0; $i<count($array_pos); $i++){
-						$widgets = getWidgets($array_pos[$i], $mysqli);
+						$widgets = getWidgets($array_pos[$i], "html", $mysqli);
 						if(!empty($widgets)){
 							$result = '<h3>Posizione: '.$array_pos[$i].'</h3>';
 							$result .= '<table><thead><tr>';
@@ -61,11 +64,13 @@
 							$result .= '</tr></thead>';
 							foreach($widgets as $widget){
 								$result .= '<tr><td><form action="modifica-widget.php" method="post" >';
-					  			$result .= '<input type="hidden" name = "name_widget_sel" value="'.$widget->name_widget.'" />';
+					  			$result .= '<input type="hidden" name="name_widget_sel" value="'.$widget->name_widget.'" />';
+					  			$result .= '<input type="hidden" name="type_widget" value="'.$widget->type.'" />';
 					  			$result .= '<button class="mod-del-info edit" name="Modifica" title="Modifica" type="submit" ></button>';
 					  			$result .= '</form>';
 					  			$result .= '<form action="elimina-widget.php" method="post" >';
 					  			$result .= '<input type="hidden" name="name_widget_sel" value="'.$widget->name_widget.'" />';
+					  			$result .= '<input type="hidden" name="type_widget" value="'.$widget->type.'" />';
 					  			$result .= '<button class="mod-del-info delete" name="Elimina" title="Elimina" type="submit" ';
 					  			$result .= 'onclick="return confirm(\'Sicuro di voler elliminare la pagina selezionata?\')" ></button>';
 					  			$result .= '</form></td>';
@@ -79,11 +84,43 @@
 							}
 							$result .= '<tr><td><form action="nuovo-widget.php" method="post" >';
 				  			$result .= '<input type="hidden" name="pos_widget" value="'.($i+1).'"/>';
+				  			$result .= '<input type="hidden" name="type_widget" value="html"/>';
 				  			$result .= '<button class="mod-del-info add" name="Inserisci" title="Inserisci" type="submit" ></button>';
 				  			$result .= '</form></td><td></td><td></td><td></td><td></td></tr></table>';
 				  			echo $result;
 						}	
-					}	
+					}
+					$widgets = getWidgetsLogin("login", $mysqli);
+					$result = '<h3>Login Form: </h3>';
+					$result .= '<table><thead><tr>';
+					$result .= '<th>Azioni</th><th>Stato</th><th>Nome</th><th>Data Creazione</th><th>Autore</th>';
+					$result .= '</tr></thead>';
+					foreach($widgets as $widget){
+						$result .= '<tr><td><form action="modifica-widget.php" method="post" >';
+			  			$result .= '<input type="hidden" name="name_widget_sel" value="'.$widget->name_widget.'" />';
+			  			$result .= '<input type="hidden" name="type_widget" value="'.$widget->type.'" />';
+			  			$result .= '<button class="mod-del-info edit" name="Modifica" title="Modifica" type="submit" ></button>';
+			  			$result .= '</form>';
+			  			$result .= '<form action="elimina-widget.php" method="post" >';
+			  			$result .= '<input type="hidden" name="name_widget_sel" value="'.$widget->name_widget.'" />';
+			  			$result .= '<input type="hidden" name="type_widget" value="'.$widget->type.'" />';
+			  			$result .= '<button class="mod-del-info delete" name="Elimina" title="Elimina" type="submit" ';
+			  			$result .= 'onclick="return confirm(\'Sicuro di voler elliminare la pagina selezionata?\')" ></button>';
+			  			$result .= '</form></td>';
+			  			if($widget->published)
+			  				$result .= '<td><img src="../images/online.svg" title="Pubblicato"></td>';
+			  			else
+			  				$result .= '<td><img src="../images/offline.svg" title="Non Pubblicato"></td>';
+						$result .= '<td>'.$widget->name_widget.'</td>';
+						$result .= '<td>'.$widget->date_creation.'</td>';
+						$result .= '<td>'.$widget->user_author.'</td></tr>';
+					}
+					$result .= '<tr><td><form action="nuovo-widget.php" method="post" >';
+		  			$result .= '<input type="hidden" name="pos_widget" value="'.($i+1).'"/>';
+		  			$result .= '<input type="hidden" name="type_widget" value="login"/>';
+		  			$result .= '<button class="mod-del-info add" name="Inserisci" title="Inserisci" type="submit" ></button>';
+		  			$result .= '</form></td><td></td><td></td><td></td><td></td></tr></table>';
+		  			echo $result;	
 				?>
 				
 			</div>

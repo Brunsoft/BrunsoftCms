@@ -6,9 +6,9 @@
 	sec_session_start();
 	
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
-		
-	echo $_SERVER['DOCUMENT_ROOT'];
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 ?>
 <!DOCTYPE HTML>
 <!--
@@ -28,7 +28,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>
@@ -66,7 +66,7 @@
 				  			$result .= '<form action="elimina-articolo.php" method="post" >';
 				  			$result .= '<input type="hidden" name="name_article_sel" value="'.$article->name_article.'" />';
 				  			$result .= '<button class="mod-del-info delete" name="Elimina" title="Elimina" type="submit" ';
-				  			$result .= 'onclick="return confirm(\'Sicuro di voler elliminare l\'articolo selezionato?\')" ></button>';
+				  			$result .= "onclick=\"return confirm('Sicuro di voler elliminare la pagina selezionata?')\"></button>";
 				  			$result .= '</form></td>';
 				  			if($article->published)
 				  				$result .= '<td><img src="../images/online.svg" title="Pubblicato"></td>';

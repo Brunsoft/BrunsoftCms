@@ -6,7 +6,10 @@
 	sec_session_start();
 	
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
+		
 ?>
 <!DOCTYPE HTML>
 <!--
@@ -26,7 +29,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>
@@ -52,7 +55,7 @@
 				</header>
 				<?php 
 					$pages = getPages($mysqli);
-					$result = '<thead><tr><th>Azioni</th><th>Titolo</th><th>Autore</th><th>Data</th></tr></thead>';
+					$result = '<thead><tr><th>Azioni</th><th>Titolo</th><th>Permalink</th><th>Data Creazione</th></tr></thead>';
 					foreach($pages as $page){
 						$result .= "<tr><td><form action=\"modifica-pagina.php\" method=\"post\" >";
 			  			$result .= "<input type=\"hidden\" name =\"id_page_sel\" value=\"".$page->id_page."\" />";
@@ -60,7 +63,7 @@
 			  			$result .= "<form action=\"elimina-pagina.php\" method=\"post\" >";
 			  			$result .= "<input type=\"hidden\" name =\"id_page_sel\" value=\"".$page->id_page."\" />";
 			  			$result .= "<button class=\"mod-del-info delete\" name=\"Elimina\" title=\"Elimina\" type=\"submit\" onclick=\"return confirm('Sicuro di voler elliminare la pagina selezionata?')\" ></button></form></td>";
-						$result .= "<td>".$page->name_page."</td><td>".$page->permalink."</td><td>".$page->user_author."</td></tr>";
+						$result .= "<td>".$page->name_page."</td><td>".$page->permalink.$page->permaname."</td><td>".$page->date_creation."</td></tr>";
 					}
 					$result .= "<tr><td><form action=\"nuova-pagina.php\" method=\"post\" >";
 		  			$result .= "<input type=\"hidden\" name =\"name_page\" />";

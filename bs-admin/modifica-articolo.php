@@ -20,7 +20,9 @@
 	if(isset($_POST['public_article'])) $public_article = 1;
 		
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 	
 	elseif(isset($_POST['modifica']) && isset($_POST['old_name_article']) && isset($_POST['name_article']) && isset($_POST['category_article'])){
 		if(checkData()){
@@ -94,7 +96,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>

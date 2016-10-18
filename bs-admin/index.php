@@ -1,10 +1,16 @@
 <?php
 	require("../src/database/db_connect.php");
 	require("../src/login/function_login.php");
+	require("../src/pagine/function_page.php");
+	require("../src/articoli/function_article.php");
+	require("../src/widget/function_widget.php");
 	sec_session_start();
 	
 	if(!login_check($mysqli))
 		header('Location: ../bs_login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
+
 ?>
 <!DOCTYPE HTML>
 <!--
@@ -24,12 +30,12 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
-					<a href="#">Menu</a>
-					<a href="#">Articoli</a>
-					<a href="#">Widget</a>
+					<a href="gest-menu.php">Menu</a>
+					<a href="gest-articoli.php">Articoli</a>
+					<a href="gest-widget.php">Widget</a>
 					<a href="logout.php" >Logout</a>
 				</nav>
 				<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
@@ -43,44 +49,27 @@
 					<h2>Pagina di Amministrazione</h2>
 					<p>Aliquam erat volutpat nam dui </p>
 				</header>
-				<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-				<div class="flex flex-3">
-					<article>
-						<div class="image fit">
-							<img src="../images/pic01.jpg" alt="Pic 01" />
-						</div>
-						<header>
-							<h3>Praesent placerat magna</h3>
-						</header>
-						<p>Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor lorem ipsum.</p>
-						<footer>
-							<a href="#" class="button special">More</a>
-						</footer>
-					</article>
-					<article>
-						<div class="image fit">
-							<img src="../images/pic02.jpg" alt="Pic 02" />
-						</div>
-						<header>
-							<h3>Fusce pellentesque tempus</h3>
-						</header>
-						<p>Sed adipiscing ornare risus. Morbi est est, blandit sit amet, sagittis vel, euismod vel, velit. Pellentesque egestas sem. Suspendisse commodo ullamcorper magna non comodo sodales tempus.</p>
-						<footer>
-							<a href="#" class="button special">More</a>
-						</footer>
-					</article>
-					<article>
-						<div class="image fit">
-							<img src="../images/pic02.jpg" alt="Pic 02" />
-						</div>
-						<header>
-							<h3>Fusce pellentesque tempus</h3>
-						</header>
-						<p>Sed adipiscing ornare risus. Morbi est est, blandit sit amet, sagittis vel, euismod vel, velit. Pellentesque egestas sem. Suspendisse commodo ullamcorper magna non comodo sodales tempus.</p>
-						<footer>
-							<a href="#" class="button special">More</a>
-						</footer>
-					</article>
+				<div class="flex flex-4 align-center">
+					<div class="box">
+						<h3><a href="gest-pagine.php">Pagine</a></h3>
+						<div><img src="../images/online.svg"><?php echo ' '.getOnlinePages($mysqli).' '; ?>Pagine online</div>
+						<div><img src="../images/offline.svg"><?php echo ' '.getOfflinePages($mysqli).' '; ?>Pagine offline</div>
+					</div>
+					<div class="box">
+						<h3><a href="gest-menu.php">Menu</a></h3>
+						<div><img src="../images/online.svg"><?php echo ' '.getOnlineMenus($mysqli).' '; ?>Menu online</div>
+						<div><img src="../images/offline.svg"><?php echo ' '.getOfflineMenus($mysqli).' '; ?>Menu offline</div>
+					</div>
+					<div class="box">
+						<h3><a href="gest-articoli.php">Articoli</a></h3>
+						<div><img src="../images/online.svg"><?php echo ' '.getOnlineArticles($mysqli).' '; ?>Articoli online</div>
+						<div><img src="../images/offline.svg"><?php echo ' '.getOfflineArticles($mysqli).' '; ?>Articoli offline</div>
+					</div>
+					<div class="box">
+						<h3><a href="gest-widget.php">Widget</a></h3>
+						<div><img src="../images/online.svg"><?php echo ' '.getOnlineWidgets($mysqli).' '; ?>Widget online</div>
+						<div><img src="../images/offline.svg"><?php echo ' '.getOfflineWidgets($mysqli).' '; ?>Widget offline</div>
+					</div>
 				</div>
 			</div>
 		</section>

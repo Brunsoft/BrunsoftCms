@@ -6,30 +6,30 @@ class Submenu{
     public $main;
     public $ord;
     public $link;
-    public $permaname;
+    public $url;
     public $sub_menu;
 
-    public function __construct($id_sub_menu, $name_menu, $name_sub_menu, $main, $ord, $link, $permaname, $mysqli){
+    public function __construct($id_sub_menu, $name_menu, $name_sub_menu, $main, $ord, $link, $url, $mysqli){
     	$this->id_sub_menu = $id_sub_menu;
         $this->name_menu = $name_menu;
         $this->name_sub_menu = $name_sub_menu;
         $this->main = $main;
         $this->ord = $ord;
         $this->link = $link;
-        $this->permaname = $permaname;
+        $this->url = $url;
         $this->sub_menu = array();
         $this->init_submenu($name_menu, $id_sub_menu, $mysqli);
     }
     
     public function init_submenu($name_menu, $main, $mysqli){
-		if ($stmt = $mysqli->prepare("SELECT id_sub_menu, name_sub_menu, main, ord, link, permaname FROM sub_menu WHERE name_menu = ? AND main = ? ORDER BY ord")) {
+		if ($stmt = $mysqli->prepare("SELECT id_sub_menu, name_sub_menu, main, ord, link, url FROM sub_menu WHERE name_menu = ? AND main = ? ORDER BY ord")) {
 			$stmt->bind_param('si', $name_menu, $main); 
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id_sub_menu, $name_sub_menu, $main, $ord, $link, $permaname); 
+			$stmt->bind_result($id_sub_menu, $name_sub_menu, $main, $ord, $link, $url); 
 			if ($stmt->affected_rows > 0) {
 				while ($stmt->fetch()) {
-					array_push($this->sub_menu, new Submenu($id_sub_menu, $name_menu, $name_sub_menu, $main, $ord, $link, $permaname, $mysqli));
+					array_push($this->sub_menu, new Submenu($id_sub_menu, $name_menu, $name_sub_menu, $main, $ord, $link, $url, $mysqli));
 				}
 			}
 		}

@@ -251,4 +251,28 @@
 	   	}
 	   	return false;
 	}	
+	
+	function getOnlinePages($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM page WHERE published = 1")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
+	
+	function getOfflinePages($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM page WHERE published = 0")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
 ?>

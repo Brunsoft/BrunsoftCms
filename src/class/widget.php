@@ -45,14 +45,14 @@ class Widget{
 			}
 	   	}
 	   	if(strcmp($type, "menu") == 0){
-			if ($stmt = $mysqli->prepare("SELECT id_sub_menu, name_sub_menu, main, ord, link, permaname FROM sub_menu WHERE name_menu = ? AND main IS NULL ORDER BY ord")) {
+			if ($stmt = $mysqli->prepare("SELECT id_sub_menu, name_sub_menu, main, ord, link, url FROM sub_menu WHERE name_menu = ? AND main IS NULL ORDER BY ord")) {
 				$stmt->bind_param('s', $name_widget); 
 				$stmt->execute();
 				$stmt->store_result();
-				$stmt->bind_result($id_sub_menu, $name_sub_menu, $main, $ord, $link, $permaname); 
+				$stmt->bind_result($id_sub_menu, $name_sub_menu, $main, $ord, $link, $url); 
 				if ($stmt->affected_rows > 0) {
 					while ($stmt->fetch()) {
-						array_push($this->sub_menu, new Submenu($id_sub_menu, $name_widget, $name_sub_menu, $main, $ord, $link, $permaname, $mysqli));
+						array_push($this->sub_menu, new Submenu($id_sub_menu, $name_widget, $name_sub_menu, $main, $ord, $link, $url, $mysqli));
 					}
 				}
 			}

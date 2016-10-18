@@ -35,11 +35,12 @@ class Controller
 				}
 			}			
 		}
-		//echo '<br/>OK: '.$page_ok;
-		if($page_ok == count($pages)-1)
+		
+		if($page_ok == count($pages)-1){
 			$this->model->init($pages[count($pages)-2]);
-    	
-    	return $this->model->page;	
+    		return true;
+		}
+		return false;	
 	}
 }
 ?>

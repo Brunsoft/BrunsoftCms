@@ -7,6 +7,8 @@
 	
 	if(!login_check($mysqli))
 		header('Location: ../bs_login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 				
 	elseif(isset($_POST['id_page_sel'])){
 		if(searchPage($_POST['id_page_sel'], $mysqli) == 2){

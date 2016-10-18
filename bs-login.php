@@ -9,7 +9,7 @@
 		if(login($_POST['email'], $_POST['p'], $mysqli))
 			header('Location: bs-admin/index.php');
 		else
-			header('Location: bs_login.php');
+			header('Location: bs-login.php');
 	}
 ?>
 
@@ -50,7 +50,7 @@
 				<?php if(isset($_SESSION['message'])) echo "<p>".$_SESSION['message']."</p>" ?>
 			</header>
 			<div>
-				<form action="bs_login.php" method="post" name="login_form" id="login_form" class="align-center">
+				<form method="post" name="login_form" id="login_form" class="align-center">
 					Email: <input type="text" name="email" id="email" style="max-width: 300px; margin: 0 auto;"/><br />
 					Password: <input type="password" name="pwd" id="pwd" style="max-width: 300px; margin: 0 auto;"/><br />
 				   	<input type="button" value="Login" id="button_login"/>

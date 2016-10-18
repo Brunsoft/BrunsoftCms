@@ -1,14 +1,21 @@
 <?php
 	function sec_session_start() {
-        $session_name = 'sec_session_id'; 				// Imposta un nome di sessione
+        $session_name = 'mvc-id'; 						// Imposta un nome di sessione
         $secure = false;	 							// Imposta il parametro a true se vuoi usare il protocollo 'https'.
-        $httponly = true; 								// Questo impedirà ad un javascript di essere in grado di accedere all'id di sessione.
+        $httponly = false; 								// Questo impedirà ad un javascript di essere in grado di accedere all'id di sessione.
         ini_set('session.use_only_cookies', 1); 		// Forza la sessione ad utilizzare solo i cookie.
         $cookieParams = session_get_cookie_params(); 	// Legge i parametri correnti relativi ai cookie.
         session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $secure, $httponly); 
         session_name($session_name); 					// Imposta il nome di sessione con quello prescelto all'inizio della funzione.
         session_start(); 								// Avvia la sessione php.
         session_regenerate_id(); 						// Rigenera la sessione e cancella quella creata in precedenza.
+	}
+	
+	function login_widget($email, $pwd, $mysqli){
+		$query = "SELECT id_user, username FROM user WHERE email = '".$email."' AND pwd = '".$pwd."'";
+		if(mysqli_multi_query($mysqli, $query))
+			return 'Ok!: '.$query;
+		return 'Er!: '.$query;
 	}
 	
 	function login($email, $password, $mysqli) {
@@ -22,7 +29,7 @@
 			if($stmt->num_rows == 1) {
 				
 				if($db_password == $password) {    
-					$user_browser = $_SERVER['HTTP_USER_AGENT']; 
+					$user_browser = "Ciao";		//$_SERVER['HTTP_USER_AGENT']; 
 					$_SESSION['user_id'] = $user_id; 
 					$_SESSION['username'] = $username;
 					$_SESSION['login_string'] = hash('sha512', $password.$user_browser);
@@ -42,8 +49,8 @@
 	  if(isset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['login_string'])) {
 	     $user_id = $_SESSION['user_id'];
 	     $login_string = $_SESSION['login_string'];
-	     $username = $_SESSION['username'];     
-	     $user_browser = $_SERVER['HTTP_USER_AGENT']; 
+	     $username = $_SESSION['username'];
+	     $user_browser = "Ciao"; //$_SERVER['HTTP_USER_AGENT']; 
 	     if ($stmt = $mysqli->prepare("SELECT pwd FROM user WHERE id_user = ? LIMIT 1")) { 
 	        $stmt->bind_param('i', $user_id); 
 	        $stmt->execute(); 
@@ -63,5 +70,38 @@
 	        return false;
 	   }else
 	     return false;
+	}
+	
+	function isAdmin($mysqli) {
+	   
+	   if(isset($_SESSION['user_id'], $_SESSION['username'], $_SESSION['login_string'])) {
+	     $user_id = $_SESSION['user_id'];
+	     
+	     if ($stmt = $mysqli->prepare("SELECT permission FROM user WHERE id_user = ? LIMIT 1")) { 
+	        $stmt->bind_param('i', $user_id); 
+	        $stmt->execute();
+	        $stmt->store_result();
+	 
+	        if($stmt->num_rows == 1) { 		
+	           $stmt->bind_result($permission);
+	           $stmt->fetch();
+	           if($permission == 'a') 		// Ok sei amministratore!!!!
+		       		return 3;
+		       elseif($permission == 's') 	// Ok sei superuser!!!!
+	           		return 2;
+	           elseif($permission == 'u') 	// Sei un utente!!!
+	           		return 1;
+	           else
+	           		return 0;	
+	           
+	        } else {
+	            return 0;
+	        }
+	     } else {
+	        return 0;
+	     }
+	   } else {
+	     return 0;
+	   }
 	}
 ?>

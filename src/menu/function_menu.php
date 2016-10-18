@@ -80,41 +80,18 @@
 	   return 0;			// errore
 	}
 	
-	function findPermaName($name_menu, $name_submenu, $mysqli){
-		$name = strtolower(str_replace(" ","-",$name_submenu));
-		if(findEqualSubMenu($name_menu, $name, $mysqli) == 2){
-			$i = 1;
-			while(findEqualSubMenu($name_menu, $name.'-'.$i, $mysqli) == 2){
-				$i++;
-			}
-			$name = $name.'-'.$i;
-		}
-		return $name;
-	}
 	
-	function findEqualSubMenu($name_menu, $permaname, $mysqli){
-		if ($stmt = $mysqli->prepare("SELECT * FROM sub_menu WHERE name_menu = ? AND permaname = ?")) {
-			$stmt->bind_param('ss', $name_menu, $permaname);
-			$stmt->execute();
-			$stmt->store_result(); 
-			if ($stmt->affected_rows == 0)			// 1 la pagina non esiste
-				return 1;
-			elseif($stmt->affected_rows >= 1)		// 2 la pagina esiste
-				return 2;
-	   }
-	   return 0;			// errore
-	}
 	
 	function getSubMenuSel($name_menu, $id_sub_menu, $mysqli){
 		$sub_menu = "";
-		if ($stmt = $mysqli->prepare("SELECT name_sub_menu, main, ord, link, permaname FROM sub_menu WHERE id_sub_menu = ? AND name_menu = ?")) {
+		if ($stmt = $mysqli->prepare("SELECT name_sub_menu, main, ord, link, url FROM sub_menu WHERE id_sub_menu = ? AND name_menu = ?")) {
 			$stmt->bind_param('is', $id_sub_menu, $name_menu);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($name_sub_menu, $main, $ord, $link, $permaname); 
+			$stmt->bind_result($name_sub_menu, $main, $ord, $link, $url); 
 			if ($stmt->affected_rows > 0){
 				while ($stmt->fetch()) {
-					$sub_menu = new Submenu($id_sub_menu, $name_menu, $name_sub_menu, $main, $ord, $link, $permaname, $mysqli);
+					$sub_menu = new Submenu($id_sub_menu, $name_menu, $name_sub_menu, $main, $ord, $link, $url, $mysqli);
 				}
 			}
 		}
@@ -160,12 +137,12 @@
 	   	return false;
 	}
 	
-	function updateSubmenu($id_submenu_sel, $name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $mysqli) {
+	function updateSubmenu($id_submenu_sel, $name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli) {
 		if($main_submenu == 0)
 			$main_submenu = null;
 			
-	   	if ($stmt = $mysqli->prepare("UPDATE sub_menu SET name_sub_menu = ?, main = ?, ord = ?, link = ? WHERE id_sub_menu = ? AND name_menu = ?")) {
-			$stmt->bind_param('siisis', $name_submenu, $main_submenu, $ord_submenu, $link_submenu, $id_submenu_sel, $name_menu);
+	   	if ($stmt = $mysqli->prepare("UPDATE sub_menu SET name_sub_menu = ?, main = ?, ord = ?, link = ?, url = ? WHERE id_sub_menu = ? AND name_menu = ?")) {
+			$stmt->bind_param('siissis', $name_submenu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $id_submenu_sel, $name_menu);
 			$stmt->execute(); 
 			$stmt->store_result();
 			if ($stmt->affected_rows >= 0) 
@@ -174,15 +151,15 @@
 	   	return false;
 	}
 	
-	function insertSubmenu($name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $permaname_submenu, $mysqli) {
+	function insertSubmenu($name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli) {
 		if($main_submenu == 0)
 			$main_submenu = null;
 			
-	   	if ($stmt = $mysqli->prepare("INSERT INTO sub_menu (name_menu, name_sub_menu, main, ord, link, permaname) VALUES(?, ?, ?, ?, ?, ?)")) {
-			$stmt->bind_param('ssiiss', $name_menu, $name_submenu, $main_submenu, $ord_submenu, $link_submenu, $permaname_submenu);
+	   	if ($stmt = $mysqli->prepare("INSERT INTO sub_menu (name_menu, name_sub_menu, main, ord, link, url) VALUES(?, ?, ?, ?, ?, ?)")) {
+			$stmt->bind_param('ssiiss', $name_menu, $name_submenu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu);
 			$stmt->execute(); 
 			$stmt->store_result();
-			if ($stmt->affected_rows >= 0) 
+			if ($stmt->affected_rows > 0) 
 				return true;
 	   	}
 	   	return false;

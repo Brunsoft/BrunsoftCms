@@ -20,7 +20,9 @@
 	if(isset($_POST['page_menu'])) $page_menu = $_POST['page_menu'];
 
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 			
 	elseif(isset($_POST['modifica']) && isset($_POST['name_menu']) && isset($_POST['pos_menu'])){
 		
@@ -119,7 +121,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>

@@ -1,4 +1,6 @@
 <?php
+require_once('comment.php');
+
 class Article{
     public $name_article;
     public $category;
@@ -8,6 +10,7 @@ class Article{
     public $user_author;
     public $user_last_edit;
 	public $published;
+	public $comments;
     
     public function __construct($name_article, $mysqli){
     	$this->init($name_article, $mysqli);
@@ -31,7 +34,18 @@ class Article{
 					$this->published = $published;
 				}
 			}
-	   	}
+			$this->comments = array();
+			if ($stmt = $mysqli->prepare("SELECT ac.id_user, u.username, ac.data, ac.html FROM article_comment ac JOIN user u ON ac.id_user = u.id_user WHERE ac.name_article = ?")) {
+				$stmt->bind_param('s', $this->name_article); 
+				$stmt->execute();
+				$stmt->store_result();
+				$stmt->bind_result($id_user, $username, $date, $html); 
+				if ($stmt->affected_rows > 0) {
+					while ($stmt->fetch()) {
+						array_push($this->comments, new Comment($id_user, $username, $date, $html));
+					}
+				}
+	   		}
+		}
 	}
-
 }

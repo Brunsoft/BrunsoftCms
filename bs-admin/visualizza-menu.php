@@ -13,7 +13,8 @@
 	$name_submenu = "";
 	$link_submenu = "";
 	$main_submenu = 0;
-	$permaname_submenu = "";
+	$url_submenu = "";
+	$type_submenu = 0;
 	
 	unset($_SESSION['message']);
 	
@@ -25,10 +26,13 @@
 	if(isset($_POST['name_submenu'])) $name_submenu = $_POST['name_submenu'];
 	if(isset($_POST['link_submenu'])) $link_submenu = $_POST['link_submenu'];
 	if(isset($_POST['main_submenu'])) $main_submenu = $_POST['main_submenu'];
-	if(isset($_POST['permaname_submenu'])) $permaname_submenu = $_POST['permaname_submenu'];
+	if(isset($_POST['url_submenu'])) $url_submenu = $_POST['url_submenu'];
+	if(isset($_POST['type_submenu'])) $type_submenu = $_POST['type_submenu'];
 	
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 			
 	if(isset($_POST['inserisci'])){
 		if($main_submenu == 0)
@@ -36,19 +40,32 @@
 		if(checkData()){
 			if(searchMenu($name_menu, $mysqli) == 2){
 				if($main_submenu == null || searchSubMenu($name_menu, $main_submenu, $mysqli) == 2){
-					if(searchPage($link_submenu, $mysqli) == 2){
+					if(searchPage($link_submenu, $mysqli) == 2 || $type_submenu != 1){
 						$ord_submenu = countSubmenu($name_menu, $main_submenu, $mysqli) + 1;
-						$permaname_submenu = findPermaName($name_menu, $name_submenu, $mysqli);
-						
-						if(insertSubmenu($name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $permaname_submenu, $mysqli)){
-							$id_submenu_sel = 0;
-							$name_submenu = "";
-							$link_submenu = "";
-							$main_submenu = 0;
-							$permaname_submenu = "";
-							$_SESSION['message'] = "<nt>Sottovoce inserita con successo</nt>";
+						if($type_submenu == 1){
+							$url_submenu = null;
+							if(insertSubmenu($name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli)){
+								resetVar();
+								$_SESSION['message'] = "<nt>Sottovoce inserita con successo</nt>";
+							}else
+								$_SESSION['message'] = "<er>Errore durante l'inserimento</er>";
+						}elseif($type_submenu == 2){
+							$link_submenu = null;
+							if(insertSubmenu($name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli)){
+								resetVar();
+								$_SESSION['message'] = "<nt>Sottovoce modificata con successo</nt>";
+							}else
+								$_SESSION['message'] = "<er>Errore durante l'update</er>";
+						}elseif($type_submenu == 3){
+							$url_submenu = null;
+							$link_submenu = null;
+							if(insertSubmenu($name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli)){
+								resetVar();
+								$_SESSION['message'] = "<nt>Sottovoce modificata con successo</nt>";
+							}else
+								$_SESSION['message'] = "<er>Errore durante l'update</er>";
 						}else
-							$_SESSION['message'] = "<er>Errore durante l'inserimento</er>";
+							$_SESSION['message'] = "<er>Valore tipo sottomenu non corretto</er>";
 					}else
 						$_SESSION['message'] = "<er>La pagina selezionata non esiste</er>";	
 				}else
@@ -64,22 +81,37 @@
 			if(searchMenu($name_menu, $mysqli) == 2){
 				if(searchSubMenu($name_menu, $id_submenu_sel, $mysqli) == 2){
 					if($main_submenu == null || searchSubMenu($name_menu, $main_submenu, $mysqli) == 2){
-						if(searchPage($link_submenu, $mysqli) == 2){
+						if(searchPage($link_submenu, $mysqli) == 2 || $type_submenu != 1){
 							$sub_menu_sel = getSubMenuSel($name_menu, $id_submenu_sel, $mysqli);
 							$ord_submenu = $sub_menu_sel->ord;
 							if($sub_menu_sel->main != $main_submenu)
 								$ord_submenu = countSubmenu($name_menu, $main_submenu, $mysqli) + 1;
-							
-							if(updateSubmenu($id_submenu_sel, $name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $mysqli)){
-								$id_submenu_sel = 0;
-								$name_submenu = "";
-								$link_submenu = "";
-								$main_submenu = 0;
-								$permaname_submenu = "";
-								$_SESSION['message'] = "<nt>Sottovoce modificata con successo</nt>";
 								
+							if($type_submenu == 1){
+								$url_submenu = null;
+								if(updateSubmenu($id_submenu_sel, $name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu,$url_submenu, $mysqli)){
+								resetVar();
+								$_SESSION['message'] = "<nt>Sottovoce modificata con successo</nt>";
+								}else
+									$_SESSION['message'] = "<er>Errore durante l'update</er>";
+							}elseif($type_submenu == 2){
+								$link_submenu = null;
+								if(updateSubmenu($id_submenu_sel, $name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli)){
+								resetVar();
+								$_SESSION['message'] = "<nt>Sottovoce modificata con successo</nt>";
+								}else
+									$_SESSION['message'] = "<er>Errore durante l'update</er>";
+							}elseif($type_submenu == 3){
+								$url_submenu = null;
+								$link_submenu = null;
+								if(updateSubmenu($id_submenu_sel, $name_submenu, $name_menu, $main_submenu, $ord_submenu, $link_submenu, $url_submenu, $mysqli)){
+								resetVar();
+								$_SESSION['message'] = "<nt>Sottovoce modificata con successo</nt>";
+								}else
+									$_SESSION['message'] = "<er>Errore durante l'update</er>";
 							}else
-								$_SESSION['message'] = "<er>Errore durante l'update</er>";		
+								$_SESSION['message'] = "<er>Valore tipo sottomenu non corretto</er>";
+									
 						}else
 							$_SESSION['message'] = "<er>La pagina selezionata non esiste</er>";	
 					}else
@@ -108,7 +140,6 @@
 		$name_submenu = "";
 		$link_submenu = "";
 		$main_submenu = 0;
-		$permaname_submenu = "";	
 	}
 	elseif(isset($_POST['indietro'])){
 		unset($_SESSION['message']);
@@ -122,8 +153,6 @@
 			if(strcmp($pos_menu, "menu") == 0)
 				$pos_menu = 1;
 			$sub_menu = $menu->sub_menu;
-			//echo $sub_menu[0]->sub_menu[0]->id_sub_menu;
-			
 		}else{
 			$_SESSION['message'] = "<er>Menu non trovato</er>";
 			header('Location: gest-menu.php');
@@ -135,8 +164,14 @@
 			$submenu_sel = getSubMenuSel($name_menu, $id_submenu_sel, $mysqli);
 			$name_submenu = $submenu_sel->name_sub_menu;
 			$link_submenu = $submenu_sel->link;
+			$url_submenu = $submenu_sel->url;
 			$main_submenu = $submenu_sel->main;
-			$permaname_submenu = $submenu_sel->permaname;
+			if($submenu_sel->link != null)
+				$type_submenu = 1;
+			elseif($submenu_sel->url != null)
+				$type_submenu = 2;
+			else
+				$type_submenu = 3;
 		}else{
 			$_SESSION['message'] = "<er>Submenu non trovato</er>";
 			header('Location: gest-menu.php');
@@ -155,12 +190,12 @@
 	}
 	
 	function resetVar(){
-		unset($_POST['name_menu']);
-		unset($_POST['pos_menu']);
-		if(isset($_POST['page_menu']))
-			unset($_POST['page_menu']);
-		if(isset($_POST['public_menu']))
-			unset($_POST['public_menu']);
+		$id_submenu_sel = 0;
+		$name_submenu = "";
+		$link_submenu = "";
+		$main_submenu = 0;
+		$type_submenu = 0;
+		$url_submenu = "";
 	}
 ?>
 <!DOCTYPE HTML>
@@ -181,7 +216,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>
@@ -248,9 +283,9 @@
 								<div class="select-wrapper">
 									<select name="type_submenu" id="type_submenu" onchange="typeCheck(this.form.type_submenu);" 
 										 onload="typeCheck(this.form.type_submenu);">
-										<option value="1">Link Pagina</option>
-										<option value="2">Link Esterno</option>
-										<option value="3">Voce di menu</option>
+										<option value="1" <?php if($type_submenu == 1) echo 'selected=""'; ?>>Link Pagina</option>
+										<option value="2" <?php if($type_submenu == 2) echo 'selected=""'; ?>>Link Esterno</option>
+										<option value="3" <?php if($type_submenu == 3) echo 'selected=""'; ?>>Voce di menu</option>
 									</select>
 								</div>
 							</div>
@@ -275,10 +310,10 @@
 								</div>
 							</div>
 							
-							<div class="12u$" id="div_link_esterno">
+							<div class="12u$" id="div_url_submenu">
 								<br/>
 								Link Esterno
-								<input type="text" name="link_esterno" id="link_esterno" 
+								<input type="text" name="url_submenu" id="url_submenu" value="<?php echo $url_submenu; ?>" 
 									placeholder="Link*" >
 							</div>
 							
@@ -327,12 +362,12 @@
 			function typeCheck(textField) {
 			    if (textField.value == 1) {
 			        document.getElementById("div_link_submenu").style.display = 'block';
-			        document.getElementById("div_link_esterno").style.display = 'none';
+			        document.getElementById("div_url_submenu").style.display = 'none';
 				} else if (textField.value == 2) { 
-					document.getElementById("div_link_esterno").style.display = 'block';
+					document.getElementById("div_url_submenu").style.display = 'block';
 			        document.getElementById("div_link_submenu").style.display = 'none';
 				}else if (textField.value == 3) {
-					document.getElementById("div_link_esterno").style.display = 'none';
+					document.getElementById("div_url_submenu").style.display = 'none';
 			        document.getElementById("div_link_submenu").style.display = 'none';
 				}
 			}

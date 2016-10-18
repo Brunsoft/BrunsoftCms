@@ -4,5 +4,5 @@
 	define("PASSWORD", ""); 				// Password di accesso al DB.
 	define("DATABASE", "db_mvc"); 			// Nome del database.
 	$mysqli = new mysqli(HOST, USER, PASSWORD, DATABASE);
-
+	define("ROOT", "/mvc/");
 ?>

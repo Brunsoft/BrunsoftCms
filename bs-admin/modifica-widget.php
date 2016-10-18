@@ -16,6 +16,7 @@
 	$pos_widget = 0;
 	$dim_widget = 0;
 	$public_widget = 0;
+	$type_widget = "";
 	
 	if(isset($_POST['old_name_widget'])) $old_name_widget = $_POST['old_name_widget'];
 	if(isset($_POST['name_widget'])) $name_widget = $_POST['name_widget'];
@@ -24,9 +25,12 @@
 	if(isset($_POST['pos_widget'])) $pos_widget = $_POST['pos_widget'];
 	if(isset($_POST['dim_widget'])) $dim_widget = $_POST['dim_widget'];
 	if(isset($_POST['public_widget'])) $public_widget = $_POST['public_widget'];
+	if(isset($_POST['type_widget'])) $type_widget = $_POST['type_widget'];
 		
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 	
 	elseif(isset($_POST['modifica']) && isset($_POST['old_name_widget']) && isset($_POST['name_widget']) && isset($_POST['pos_widget']) && isset($_POST['dim_widget'])){
 		if(checkData()){
@@ -43,7 +47,7 @@
 			if($wrong_pages	== 0){
 				if(searchWidget($name_widget, $mysqli) == 1 || strcmp($name_widget, $old_name_widget) == 0){
 					if(searchWidget($old_name_widget, $mysqli) == 2){
-						if(updateWidget($old_name_widget, $name_widget, $html_widget, 0, $pos_widget, $dim_widget, $public_widget, $mysqli)){
+						if(updateWidget($old_name_widget, $name_widget, $html_widget, 0, $pos_widget, $dim_widget, $type_widget, $public_widget, $mysqli)){
 							deleteWidgetPage($name_widget, $mysqli);
 							$wrong_insert = 0;
 							for($i=0; $i<count($page_widget); $i++)
@@ -78,19 +82,19 @@
 				$pos_widget = 1;
 				break;
 			case 'topA':
-				$pos_widget = 1;
+				$pos_widget = 2;
 				break;
 			case 'topB':
-				$pos_widget = 1;
+				$pos_widget = 3;
 				break;
 			case 'bottomA':
-				$pos_widget = 1;
+				$pos_widget = 4;
 				break;
 			case 'bottomB':
-				$pos_widget = 1;
+				$pos_widget = 5;
 				break;
 			case 'footer':
-				$pos_widget = 1;
+				$pos_widget = 6;
 				break;
 			default:
 				$_SESSION['message'] = "<er>Errore durante l'associazione della posizione</er>";
@@ -145,7 +149,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>
@@ -174,6 +178,8 @@
 						<div class="9u 12u$(small)">
 							<input type="hidden" name="old_name_widget" id="old_name_widget" required="" 
 								value="<?php echo $old_name_widget; ?>" >
+							<input type="hidden" name="type_widget" id="type_widget" required="" 
+								value="<?php echo $type_widget; ?>" >
 							<strong>Nome widget</strong>
 							<input type="text" name="name_widget" id="name_widget" required="" 
 								value="<?php echo $name_widget; ?>" 

@@ -14,9 +14,11 @@
 		$page_widget = $_POST['page_widget'];
 		
 	if(!login_check($mysqli))
-		header('Location: ../bs_login.php');
+		header('Location: ../bs-login.php');
+	if(isAdmin($mysqli) != 2)
+		header('Location: ../');
 	
-	elseif(isset($_POST['inserisci']) && isset($_POST['name_widget']) && isset($_POST['pos_widget']) && isset($_POST['dim_widget'])){
+	elseif(isset($_POST['inserisci']) && isset($_POST['name_widget']) && isset($_POST['pos_widget']) && isset($_POST['dim_widget']) && isset($_POST['type_widget'])){
 		if(checkData()){
 			$pos_widget = (int)$_POST['pos_widget'];
 			$dim_widget = (int)$_POST['dim_widget'];
@@ -33,7 +35,7 @@
 			
 			if($wrong_pages	== 0){
 				if(searchWidget($_POST['name_widget'], $mysqli) == 1){
-					if(insertWidget($_POST['name_widget'], $_POST['html_widget'], 0, $pos_widget, $dim_widget, $public, $mysqli)){
+					if(insertWidget($_POST['name_widget'], $_POST['html_widget'], 0, $pos_widget, $dim_widget, $_POST['type_widget'], $public, $mysqli)){
 						$wrong_insert = 0;
 						for($i=0; $i<count($page_widget); $i++)
 							if(!insertWidgetPage($page_widget[$i], $_POST['name_widget'], $mysqli))
@@ -97,7 +99,7 @@
 		<!-- Header -->
 		<header id="header">
 			<div class="inner">
-				<a href="bs_login.php" class="logo">Brunsoft</a>
+				<a href="<?php echo ROOT; ?>" class="logo">Brunsoft</a>
 				<nav id="nav">
 					<a href="gest-pagine.php">Pagine</a>
 					<a href="gest-menu.php">Menu</a>
@@ -124,6 +126,8 @@
 				<form method="post" action="">
 					<div class="row uniform">
 						<div class="9u 12u$(small)">
+							<input type="hidden" name="type_widget" id="type_widget" required="" 
+								value="<?php if(isset($_POST['type_widget'])) echo $_POST['type_widget']; ?>" >
 							<strong>Nome widget</strong>
 							<input type="text" name="name_widget" id="name_widget" required="" 
 										value="<?php if(isset($_POST['name_widget'])) echo $_POST['name_widget']; ?>" 

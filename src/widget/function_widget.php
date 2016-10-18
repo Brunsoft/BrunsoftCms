@@ -1,8 +1,24 @@
 <?php
-	function getWidgets($pos, $mysqli){
+	function getWidgets($pos, $type, $mysqli){
 		$widgets = array();
-		if ($stmt = $mysqli->prepare("SELECT name_widget FROM widget WHERE pos = ?")) {
-			$stmt->bind_param('s', $pos);
+		if ($stmt = $mysqli->prepare("SELECT name_widget FROM widget WHERE pos = ? AND type = ?")) {
+			$stmt->bind_param('ss', $pos, $type);
+			$stmt->execute();
+			$stmt->store_result();
+			$stmt->bind_result($name_widget); 
+			if ($stmt->affected_rows > 0){
+				while ($stmt->fetch()) {
+					array_push($widgets, new Widget($name_widget, $mysqli));
+				}
+			}
+		}
+		return $widgets;
+	}
+	
+	function getWidgetsLogin($type, $mysqli){
+		$widgets = array();
+		if ($stmt = $mysqli->prepare("SELECT name_widget FROM widget WHERE type = ?")) {
+			$stmt->bind_param('s', $type);
 			$stmt->execute();
 			$stmt->store_result();
 			$stmt->bind_result($name_widget); 
@@ -44,10 +60,9 @@
 	   return 0;			// errore
 	}
 	
-	function insertWidget($name, $html, $ord, $pos, $dim, $public, $mysqli) {		
+	function insertWidget($name, $html, $ord, $pos, $dim, $type, $public, $mysqli) {		
 	    $data = date('Y-m-d H:i:s');
 	    $id_user = (int)$_SESSION['user_id'];
-	    $type = "html";
 	    switch($pos){
 			case 1:
 				$pos = 'banner';
@@ -92,10 +107,9 @@
 	   	return false;
 	}
 	
-	function updateWidget($old_name, $name, $html, $ord, $pos, $dim, $public, $mysqli) {		
+	function updateWidget($old_name, $name, $html, $ord, $pos, $dim, $type, $public, $mysqli) {		
 	    $data = date('Y-m-d H:i:s');
 	    $id_user = (int)$_SESSION['user_id'];
-	    $type = "html";
 	    switch($pos){
 			case 1:
 				$pos = 'banner';
@@ -151,4 +165,51 @@
 	   	return false;
 	}
 	
+	function getOnlineWidgets($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM widget WHERE published = 1 AND type != 'menu'")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
+	
+	function getOfflineWidgets($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM widget WHERE published = 0 AND type != 'menu'")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
+	
+	function getOnlineMenus($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM widget WHERE published = 1 AND type = 'menu'")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
+	
+	function getOfflineMenus($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM widget WHERE published = 0 AND type = 'menu'")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}	
 ?>

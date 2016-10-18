@@ -99,4 +99,53 @@
 	   	return false;
 	}
 
+	function deleteArticle($name_article, $mysqli) {		
+		if ($stmt = $mysqli->prepare("DELETE FROM article WHERE name_article = ?")) {
+			$stmt->bind_param('s', $name_article); 	
+			$stmt->execute(); 
+			$stmt->store_result();
+			if ($stmt->affected_rows > 0) 
+				return true;
+	   	}
+	   	return false;
+	}
+	
+	function insertComment($name_artilcle, $html_comment, $mysqli) {		
+	    $data = date('Y-m-d H:i:s');
+	    $id_user = (int)$_SESSION['user_id'];
+
+	    if ($stmt = $mysqli->prepare("INSERT INTO article_comment (id_user, name_article, data, html) VALUES (?, ?, ?, ?)")) {
+			$stmt->bind_param('isss', $id_user, $name_artilcle, $data, $html_comment);
+			$stmt->execute(); 
+			$stmt->store_result();
+			if ($stmt->affected_rows > 0) 
+				return true;
+	   	}
+	   	return false;
+	}
+	
+	function getOnlineArticles($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM article WHERE published = 1")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
+	
+	function getOfflineArticles($mysqli){
+		if ($stmt = $mysqli->prepare("SELECT count(*) FROM article WHERE published = 0")) {
+			$stmt->execute();
+			$stmt->store_result(); 
+			$stmt->bind_result($count);
+			$stmt->fetch(); 
+			if ($stmt->affected_rows > 0)
+				return $count;
+	   	}
+	   	return 0;
+	}
+	
 ?>

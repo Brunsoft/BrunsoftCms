@@ -18,15 +18,15 @@ class Page{
     public $published;
     public $ord;
     public $home;
-    public $menu;		// Array oggetti Widget type menu
-    public $logo;		// Array oggetti Widget type logo
-    public $banner;		// Array oggetti Widget type banner
-    public $top_a;		// Array oggetti Widget type topA
-    public $top_b;		// Array oggetty Widget type topB
-    public $main;		// Array oggetti Article
-    public $bottom_a;	// Array oggetti Widget type bottomA
-    public $bottom_b;	// Array oggetti Widget type bottomB
-    public $footer;		// Array oggetti Widget type footer
+    public $menu;		// Array oggetti Widget pos menu
+    public $logo;		// Array oggetti Widget pos logo
+    public $banner;		// Array oggetti Widget pos banner
+    public $top_a;		// Array oggetti Widget pos topA
+    public $top_b;		// Array oggetty Widget pos topB
+    public $main;		// Array oggetti Articolo pos main
+    public $bottom_a;	// Array oggetti Widget pos bottomA
+    public $bottom_b;	// Array oggetti Widget pos bottomB
+    public $footer;		// Array oggetti Widget pos footer
 
 	public $permalink;
        
@@ -139,7 +139,7 @@ class Page{
 		return $result;
 	}
 	
-	public function toString($content, $mysqli){
+	public function toString($content, $mysqli, $logged){
 		$result = "";
 		$contents = array();
 		$class = "";
@@ -175,25 +175,53 @@ class Page{
 				foreach($contents as $c){
 					$sub_menu = $c->sub_menu;
 					foreach($sub_menu as $sb){
-						$permalink = '/mvc'.$this->getPermalink($sb->link, $mysqli);
-						$result .= '<a href="'.$permalink.'">'.$sb->name_sub_menu.'</a>';
+						if($sb->url == null ){
+							$permalink = '/mvc'.$this->getPermalink($sb->link, $mysqli);
+							$result .= '<a href="'.$permalink.'">'.$sb->name_sub_menu.'</a>';
+						}elseif($sb->link == null){
+							if(($sb->url == '/bs-login.php' && !$logged) || ($sb->url == '/bs-admin/logout.php' && $logged))
+								$result .= '<a href="/mvc'.$sb->url.'">'.$sb->name_sub_menu.'</a>';
+						}
+							
 					}
 				}
 				
 			}elseif(strcmp($content, "main") == 0){
 				if($this->category_articles == null){	// Single Article or Hidden article
-					$result .= '<section id="'.$content.'" class="wrapper style1 special">';
-					$result .= '<div class="inner">';
-					foreach($contents as $c)
-						$result .= $c->html;
-					$result .= '</div></section>';
+					if($contents[0]->published == 1){
+						$result .= '<section id="'.$content.'" class="wrapper style1 special">';
+						$result .= '<div class="inner">';
+					
+						$result .= $contents[0]->html;
+						
+						if($logged && count($contents[0]->comments)>0){
+							
+							$result .= '<hr/><table class="alt comment"><tbody>';
+							
+							foreach($contents[0]->comments as $comment){
+								$result .= '<tr><td width=50><img class="img-user" src="images/user.gif" width=50 alt=""></td><td width=200>'.$comment->username.'<br/>'.$comment->date.'</td><td>'.$comment->html.'</td></tr>';
+							}
+							$result .= '</tbody></table>';
+						}
+						if($logged){
+							$result .= 'Inserisci un commento';
+							$result .= '<form method="post" action="">';
+							$result .= '<input type="hidden" name="name_article" id="name_article" value="'.$contents[0]->name_article.'" >';
+							$result .= '<textarea name="html_article" id="html_article" placeholder="Commento" rows="4" ></textarea>';
+							$result .= '<input type="submit" class="button special small" name="inserisci" value="Inserisci" style="float: right;">';
+							$result .= '</form>';
+						}
+						
+						$result .= '</div>';
+						$result .= '</section>';
+					}
 				}
 				
 			}else{
-				if(strcmp($content, "footer") == 0)
+				if(strcmp($content, "footer") == 0){
 					$result .= '<footer id="'.$content.'" class="wrapper">';
-					
-				else{
+					$result .= '<div class="inner">';	
+				}else{
 					$result .= '<section id="'.$content.'" class="wrapper">';
 					$result .= '<div class="inner">';
 				}
